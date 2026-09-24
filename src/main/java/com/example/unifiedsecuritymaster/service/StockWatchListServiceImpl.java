@@ -1,6 +1,7 @@
 package com.example.unifiedsecuritymaster.service;
 
 import com.example.unifiedsecuritymaster.dto.request.AddStockDTO;
+import com.example.unifiedsecuritymaster.model.StockWatchList;
 import com.example.unifiedsecuritymaster.repository.StockWatchListRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,11 @@ public class StockWatchListServiceImpl implements StockWatchListService {
 
     @Override
     public String addStock(AddStockDTO addStockDTO) {
-        return "";
+        if(!stockWatchListRepository.existsBySymbol(addStockDTO.getSymbol())){
+            StockWatchList stockWatchList = new StockWatchList(null,addStockDTO.getSymbol(),addStockDTO.getName(),addStockDTO.getExchange(),addStockDTO.getIsin(),addStockDTO.getGics(),);
+        }else{
+
+        }
     }
 
     @Override
