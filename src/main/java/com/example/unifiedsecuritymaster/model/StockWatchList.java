@@ -30,8 +30,6 @@ public class StockWatchList {
 
     private String gics;
 
-    private String url;
-
     private String country;
 
     private String industry;
