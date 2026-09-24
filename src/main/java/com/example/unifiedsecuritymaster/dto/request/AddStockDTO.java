@@ -14,7 +14,7 @@ public class AddStockDTO {
     private String exchange;
     private String isin;
     private String gics;
-    private String Country;
+    private String country;
     private String industry;
     private String sector;
 

@@ -9,7 +9,9 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "stock_watchlist")
+@Table(name = "stock_watchlist",uniqueConstraints = @UniqueConstraint(
+        name = "uk_watchlist_symbol_exchange",
+        columnNames = {"symbol", "exchange"}))
 @AllArgsConstructor
 @NoArgsConstructor
 @Data

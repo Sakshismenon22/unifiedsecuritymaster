@@ -23,4 +23,12 @@ public class NseEquityCsvRow {
     private String noOfTrades;
     private String deliverableQty;
     private String deliveryPercentage;
+
+    public static final String[] COLUMN_NAMES = {
+            "symbol", "series", "tradeDate", "prevClose", "openPrice",
+            "highPrice", "lowPrice", "lastPrice", "closePrice", "averagePrice",
+            "totalTradedQuantity", "turnover", "noOfTrades",
+            "deliverableQty", "deliveryPercentage"
+    };
+
 }

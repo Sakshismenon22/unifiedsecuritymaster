@@ -1,0 +1,78 @@
+package com.example.unifiedsecuritymaster.controller;
+
+import com.example.unifiedsecuritymaster.repository.StockDataRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.job.Job;
+import org.springframework.batch.core.job.JobExecution;
+import org.springframework.batch.core.job.parameters.JobParameters;
+import org.springframework.batch.core.job.parameters.JobParametersBuilder;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.repository.persistence.StepExecution;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDate;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+@Slf4j
+@RestController
+@RequestMapping("/api/v1/batch")
+@RequiredArgsConstructor
+public class BatchTriggerController {
+
+    private final JobLauncher jobLauncher;
+    private final Job stockDataLoadJob;
+    private final StockDataRepository stockDataRepository;
+
+    @PostMapping("/stock-data/run")
+    public ResponseEntity<Map<String, Object>> runStockDataJob() throws Exception {
+
+        JobParameters params = new JobParametersBuilder()
+                .addJobParameter("businessDate", LocalDate.now().toString(), String.class, true)
+                .addJobParameter("runId", System.currentTimeMillis(), Long.class, true)
+                .toJobParameters();
+
+        JobExecution execution = jobLauncher.run(stockDataLoadJob, params);
+
+//        long read    = execution.getStepExecutions().stream().mapToLong(StepExecution::getReadCount).sum();
+//        long written = execution.getStepExecutions().stream().mapToLong(StepExecution::getWriteCount).sum();
+//        long skipped = execution.getStepExecutions().stream().mapToLong(StepExecution::getSkipCount).sum();
+        long read = 0;
+        long written = 0;
+        long skipped = 0;
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("jobExecutionId", execution.getId());
+        body.put("status",         execution.getStatus().name());
+        body.put("exitCode",       execution.getExitStatus().getExitCode());
+        body.put("watchlistRead",  read);
+        body.put("stockDataWritten", written);
+        body.put("skipped",        skipped);
+        body.put("startTime",      String.valueOf(execution.getStartTime()));
+        body.put("endTime",        String.valueOf(execution.getEndTime()));
+
+        return ResponseEntity.ok(body);
+    }
+
+    @GetMapping("/stock-data/summary")
+    public ResponseEntity<List<Object[]>> summary() {
+        return ResponseEntity.ok(stockDataRepository.summariseBySymbol());
+    }
+
+    @Scheduled(cron = "${securitymaster.schedule.cron}",
+            zone = "${securitymaster.schedule.zone}")
+    public void scheduledRun() {
+        try {
+            log.info("Scheduled stock data load starting...");
+            runStockDataJob();
+        } catch (Exception e) {
+            log.error("Scheduled run failed", e);
+        }
+    }
+}
