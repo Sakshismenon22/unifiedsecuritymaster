@@ -1,16 +1,24 @@
 package com.example.unifiedsecuritymaster.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "stock_watchlist")
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+@Builder
 public class StockWatchList {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     private String symbol;
 
@@ -31,4 +39,5 @@ public class StockWatchList {
     private String sector;
 
     private LocalDateTime lastUpdatedAt;
+
 }
