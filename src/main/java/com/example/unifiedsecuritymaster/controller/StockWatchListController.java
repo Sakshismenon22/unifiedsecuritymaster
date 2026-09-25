@@ -4,6 +4,8 @@ package com.example.unifiedsecuritymaster.controller;
 import com.example.unifiedsecuritymaster.dto.request.AddStockDTO;
 import com.example.unifiedsecuritymaster.service.StockWatchListServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,13 +16,13 @@ public class StockWatchListController {
     private final StockWatchListServiceImpl stockWatchListService;
 
     @PostMapping("/add-stock")
-    public String addStock(@RequestBody AddStockDTO addStockDTO){
-        return stockWatchListService.addStock(addStockDTO);
+    public ResponseEntity<String> addStock(@RequestBody AddStockDTO addStockDTO){
+        return new ResponseEntity<>(stockWatchListService.addStock(addStockDTO), HttpStatus.OK);
     }
 
     @DeleteMapping("/delete-stock/{id}")
-    public String deleteStock(@PathVariable Integer id){
-        return  stockWatchListService.deleteStock(id);
+    public ResponseEntity<String> deleteStock(@PathVariable Integer id){
+        return  new ResponseEntity<>(stockWatchListService.deleteStock(id), HttpStatus.OK);
     }
 
 }
