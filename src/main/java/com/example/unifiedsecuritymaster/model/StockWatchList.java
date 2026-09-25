@@ -40,4 +40,7 @@ public class StockWatchList {
 
     private LocalDateTime lastUpdatedAt;
 
+    @ManyToOne
+    private Asset asset;
+
 }

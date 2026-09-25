@@ -27,6 +27,7 @@ public class Asset {
     @Enumerated(EnumType.STRING)
     private Risk risk;
 
+    @Enumerated(EnumType.STRING)
     private InvestmentHorizon investmentHorizon;
 
     private String subAssetDescription;
