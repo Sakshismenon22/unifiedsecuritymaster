@@ -112,7 +112,7 @@ public class RestClientConfig {
         return client;
     }
 
-    /** DEV ONLY - accepts any certificate. */
+
     private SSLContext trustAllSslContext() throws Exception {
         TrustManager[] trustAll = new TrustManager[]{
                 new X509TrustManager() {
