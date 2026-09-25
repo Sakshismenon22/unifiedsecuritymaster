@@ -21,7 +21,7 @@ public class MutualFundWatchListServiceImpl implements MutualFundWatchListServic
     public String addMutualFund(AddMutualFundDTO addMutualFundDTO) {
         if(assetRepository.existsById(addMutualFundDTO.getAssetId())){
             Asset asset =assetRepository.findById(addMutualFundDTO.getAssetId()).get();
-            MutualFundWatchList mutualFundWatchList = new MutualFundWatchList(null,addMutualFundDTO.getIsin(),addMutualFundDTO.getSchemeName(),asset,true);
+            MutualFundWatchList mutualFundWatchList = new MutualFundWatchList(null,addMutualFundDTO.getIsin(),addMutualFundDTO.getSchemeName(),asset,true,null);
             mutualFundWatchListRepository.save(mutualFundWatchList);
             return "Mutual fund added to the watchlist.";
         }else {

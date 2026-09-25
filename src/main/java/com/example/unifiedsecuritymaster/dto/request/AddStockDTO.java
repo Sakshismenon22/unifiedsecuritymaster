@@ -17,6 +17,7 @@ public class AddStockDTO {
     private String country;
     private String industry;
     private String sector;
+    private Integer assetId;
 
 
 }

@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "mutualfund_watchlist")
 @AllArgsConstructor
@@ -26,5 +28,7 @@ public class MutualFundWatchList {
     private Asset asset;
 
     private Boolean status;
+
+    private LocalDate lastUpdatedAt;
 
 }
