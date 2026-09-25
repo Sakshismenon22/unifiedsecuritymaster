@@ -22,6 +22,9 @@ public class MutualFundWatchList {
 
     private String schemeName;
 
+    @ManyToOne
     private Asset asset;
+
+    private Boolean status;
 
 }

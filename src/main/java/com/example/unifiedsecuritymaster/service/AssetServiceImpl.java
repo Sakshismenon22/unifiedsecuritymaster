@@ -24,7 +24,9 @@ public class AssetServiceImpl implements AssetService{
     @Override
     public String removeAsset(Integer id) {
         if(assetRepository.existsById(id)){
-            assetRepository.deleteById(id);
+            Asset asset = assetRepository.findById(id).get();
+            asset.setStatus(false);
+            assetRepository.save(asset);
             return "Asset Removed successfully";
         }else{
             throw new AssetNotFoundException();
