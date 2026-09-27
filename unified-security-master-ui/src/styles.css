@@ -1,0 +1,31 @@
+body {
+  background-color: #f5f6f8;
+}
+
+.navbar-brand {
+  font-weight: bold;
+}
+
+.navbar-nav {
+  margin-left: 30px;
+}
+
+.nav-link {
+  margin-right: 10px;
+}
+
+.card {
+  border-radius: 8px;
+}
+
+.dashboard-card {
+  height: 100%;
+}
+
+.card-header {
+  font-weight: bold;
+}
+
+.table {
+  background-color: white;
+}
