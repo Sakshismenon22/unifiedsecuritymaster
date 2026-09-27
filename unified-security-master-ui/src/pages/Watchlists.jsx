@@ -1,14 +1,12 @@
 import { useState } from "react";
 import api from "../api";
+import Input from "../components/Input";
+import Select from "../components/Select";
 
 function Watchlists() {
+  const [activeTab, setActiveTab] = useState("stocks");
 
-  const [type, setType] = useState("stock");
-
-  const [message, setMessage] = useState("");
-
-
-  const [stock, setStock] = useState({
+  const [stockForm, setStockForm] = useState({
     symbol: "",
     name: "",
     exchange: "",
@@ -20,15 +18,13 @@ function Watchlists() {
     assetId: ""
   });
 
-
-  const [mutualFund, setMutualFund] = useState({
+  const [mutualFundForm, setMutualFundForm] = useState({
     isin: "",
     schemeName: "",
     assetId: ""
   });
 
-
-  const [commodity, setCommodity] = useState({
+  const [commodityForm, setCommodityForm] = useState({
     productId: "",
     symbol: "",
     name: "",
@@ -39,689 +35,581 @@ function Watchlists() {
     status: true
   });
 
+  const [stockDeleteId, setStockDeleteId] = useState("");
+  const [mutualFundDeleteId, setMutualFundDeleteId] =
+    useState("");
+  const [commodityDeleteId, setCommodityDeleteId] =
+    useState("");
 
-  function handleStockChange(event) {
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
-    const { name, value } = event.target;
+  const showSuccess = (text) => {
+    setError("");
+    setMessage(text);
+  };
 
-    setStock({
-      ...stock,
-      [name]: value
-    });
-  }
+  const showError = (text) => {
+    setMessage("");
+    setError(text);
+  };
 
-
-  function handleMutualFundChange(event) {
-
-    const { name, value } = event.target;
-
-    setMutualFund({
-      ...mutualFund,
-      [name]: value
-    });
-  }
-
-
-  function handleCommodityChange(event) {
-
-    const { name, value } = event.target;
-
-    setCommodity({
-      ...commodity,
-      [name]: value
-    });
-  }
-
-
-  async function addStock(event) {
-
-    event.preventDefault();
+  const addStock = async (e) => {
+    e.preventDefault();
 
     try {
-
-      const body = {
-        ...stock,
-        assetId: Number(stock.assetId)
+      const payload = {
+        ...stockForm,
+        assetId: Number(stockForm.assetId)
       };
 
-      const response = await api.post(
-        "/api/stock-watchlist/add-stock",
-        body
+      await api.post(
+        "/stock-watchlist/add-stock",
+        payload
       );
 
-      console.log(response.data);
+      showSuccess("Stock added to watchlist.");
 
-      setMessage("Stock added successfully");
-
-    } catch (error) {
-
-      console.error(error);
-
-      setMessage("Failed to add stock");
-
+      setStockForm({
+        symbol: "",
+        name: "",
+        exchange: "",
+        isin: "",
+        gics: "",
+        country: "",
+        industry: "",
+        sector: "",
+        assetId: ""
+      });
+    } catch (err) {
+      showError(
+        err.response?.data?.message ||
+          "Unable to add stock."
+      );
     }
-  }
+  };
 
-
-  async function deleteStock(id) {
+  const deleteStock = async () => {
+    if (!stockDeleteId) {
+      showError("Enter the stock watchlist ID.");
+      return;
+    }
 
     try {
-
       await api.delete(
-        `/api/stock-watchlist/delete-stock/${id}`
+        `/stock-watchlist/delete-stock/${stockDeleteId}`
       );
 
-      setMessage("Stock deleted successfully");
-
-    } catch (error) {
-
-      console.error(error);
-
-      setMessage("Failed to delete stock");
-
+      showSuccess("Stock removed from watchlist.");
+      setStockDeleteId("");
+    } catch (err) {
+      showError(
+        err.response?.data?.message ||
+          "Unable to delete stock."
+      );
     }
-  }
+  };
 
-
-  async function addMutualFund(event) {
-
-    event.preventDefault();
+  const addMutualFund = async (e) => {
+    e.preventDefault();
 
     try {
-
-      const body = {
-        ...mutualFund,
-        assetId: Number(mutualFund.assetId)
+      const payload = {
+        ...mutualFundForm,
+        assetId: Number(mutualFundForm.assetId)
       };
 
-      const response = await api.post(
-        "/api/mutualfunds-watchlist/add-mutual-fund",
-        body
+      await api.post(
+        "/mutualfunds-watchlist/add-mutual-fund",
+        payload
       );
 
-      console.log(response.data);
+      showSuccess("Mutual fund added to watchlist.");
 
-      setMessage("Mutual fund added successfully");
-
-    } catch (error) {
-
-      console.error(error);
-
-      setMessage("Failed to add mutual fund");
-
+      setMutualFundForm({
+        isin: "",
+        schemeName: "",
+        assetId: ""
+      });
+    } catch (err) {
+      showError(
+        err.response?.data?.message ||
+          "Unable to add mutual fund."
+      );
     }
-  }
+  };
 
-
-  async function deleteMutualFund(id) {
+  const deleteMutualFund = async () => {
+    if (!mutualFundDeleteId) {
+      showError("Enter the mutual fund watchlist ID.");
+      return;
+    }
 
     try {
-
       await api.delete(
-        `/api/mutualfunds-watchlist/delete-mutual-fund/${id}`
+        `/mutualfunds-watchlist/delete-mutual-fund/${mutualFundDeleteId}`
       );
 
-      setMessage(
-        "Mutual fund deleted successfully"
+      showSuccess("Mutual fund removed from watchlist.");
+      setMutualFundDeleteId("");
+    } catch (err) {
+      showError(
+        err.response?.data?.message ||
+          "Unable to delete mutual fund."
       );
-
-    } catch (error) {
-
-      console.error(error);
-
-      setMessage(
-        "Failed to delete mutual fund"
-      );
-
     }
-  }
+  };
 
-
-  async function addCommodity(event) {
-
-    event.preventDefault();
+  const addCommodity = async (e) => {
+    e.preventDefault();
 
     try {
-
-      const body = {
-        ...commodity,
-        assetId: Number(commodity.assetId)
+      const payload = {
+        ...commodityForm,
+        assetId: Number(commodityForm.assetId),
+        status: Boolean(commodityForm.status)
       };
 
-      const response = await api.post(
-        "/api/commodity-watchlist/add-commodity",
-        body
+      await api.post(
+        "/commodity-watchlist/add-commodity",
+        payload
       );
 
-      console.log(response.data);
+      showSuccess("Commodity added to watchlist.");
 
-      setMessage("Commodity added successfully");
-
-    } catch (error) {
-
-      console.error(error);
-
-      setMessage("Failed to add commodity");
-
+      setCommodityForm({
+        productId: "",
+        symbol: "",
+        name: "",
+        quotation: "",
+        unit: "",
+        exchange: "",
+        assetId: "",
+        status: true
+      });
+    } catch (err) {
+      showError(
+        err.response?.data?.message ||
+          "Unable to add commodity."
+      );
     }
-  }
+  };
 
-
-  async function deleteCommodity(id) {
+  const deleteCommodity = async () => {
+    if (!commodityDeleteId) {
+      showError("Enter the commodity watchlist ID.");
+      return;
+    }
 
     try {
-
       await api.delete(
-        `/api/commodity-watchlist/delete-commodity/${id}`
+        `/commodity-watchlist/delete-commodity/${commodityDeleteId}`
       );
 
-      setMessage("Commodity deleted successfully");
-
-    } catch (error) {
-
-      console.error(error);
-
-      setMessage("Failed to delete commodity");
-
+      showSuccess("Commodity removed from watchlist.");
+      setCommodityDeleteId("");
+    } catch (err) {
+      showError(
+        err.response?.data?.message ||
+          "Unable to delete commodity."
+      );
     }
-  }
-
+  };
 
   return (
-    <div>
-
-      <h2 className="mb-4">
-        Watchlist Management
-      </h2>
-
-
-      {message && (
-        <div className="alert alert-info">
-          {message}
+    <div className="page">
+      <div className="page-header">
+        <div>
+          <h1>Watchlists</h1>
+          <p>
+            Manage stocks, mutual funds and commodities.
+          </p>
         </div>
-      )}
-
-
-      {/* SELECT WATCHLIST */}
-
-      <div className="card mb-4">
-
-        <div className="card-body">
-
-          <label className="form-label">
-            Watchlist Type
-          </label>
-
-          <select
-            className="form-select"
-            value={type}
-            onChange={(event) =>
-              setType(event.target.value)
-            }
-          >
-
-            <option value="stock">
-              Stock
-            </option>
-
-            <option value="mutualFund">
-              Mutual Fund
-            </option>
-
-            <option value="commodity">
-              Commodity
-            </option>
-
-          </select>
-
-        </div>
-
       </div>
 
+      {message && <div className="success-message">{message}</div>}
+      {error && <div className="error-message">{error}</div>}
 
-      {/* STOCK FORM */}
+      <div className="tabs">
+        <button
+          className={activeTab === "stocks" ? "tab active" : "tab"}
+          onClick={() => setActiveTab("stocks")}
+        >
+          Stocks
+        </button>
 
-      {type === "stock" && (
+        <button
+          className={
+            activeTab === "mutualFunds"
+              ? "tab active"
+              : "tab"
+          }
+          onClick={() => setActiveTab("mutualFunds")}
+        >
+          Mutual Funds
+        </button>
 
-        <div className="card">
+        <button
+          className={
+            activeTab === "commodities"
+              ? "tab active"
+              : "tab"
+          }
+          onClick={() => setActiveTab("commodities")}
+        >
+          Commodities
+        </button>
+      </div>
 
-          <div className="card-header">
-            Add Stock
-          </div>
-
-          <div className="card-body">
+      {activeTab === "stocks" && (
+        <div className="two-column">
+          <div className="card">
+            <h2>Add Stock</h2>
 
             <form onSubmit={addStock}>
+              <Input
+                label="Symbol"
+                value={stockForm.symbol}
+                onChange={(value) =>
+                  setStockForm({
+                    ...stockForm,
+                    symbol: value
+                  })
+                }
+                required
+              />
 
-              <div className="row">
+              <Input
+                label="Name"
+                value={stockForm.name}
+                onChange={(value) =>
+                  setStockForm({
+                    ...stockForm,
+                    name: value
+                  })
+                }
+                required
+              />
 
+              <Select
+                label="Exchange"
+                value={stockForm.exchange}
+                onChange={(value) =>
+                  setStockForm({
+                    ...stockForm,
+                    exchange: value
+                  })
+                }
+                options={[
+                  "NSE",
+                  "LSE",
+                  "NasdaQ"
+                ]}
+              />
 
-                <div className="col-md-6 mb-3">
+              <Input
+                label="ISIN"
+                value={stockForm.isin}
+                onChange={(value) =>
+                  setStockForm({
+                    ...stockForm,
+                    isin: value
+                  })
+                }
+              />
 
-                  <label className="form-label">
-                    Symbol
-                  </label>
+              <Input
+                label="GICS"
+                value={stockForm.gics}
+                onChange={(value) =>
+                  setStockForm({
+                    ...stockForm,
+                    gics: value
+                  })
+                }
+              />
 
-                  <input
-                    type="text"
-                    name="symbol"
-                    className="form-control"
-                    value={stock.symbol}
-                    onChange={handleStockChange}
-                    required
-                  />
+              <Input
+                label="Country"
+                value={stockForm.country}
+                onChange={(value) =>
+                  setStockForm({
+                    ...stockForm,
+                    country: value
+                  })
+                }
+              />
 
-                </div>
+              <Input
+                label="Industry"
+                value={stockForm.industry}
+                onChange={(value) =>
+                  setStockForm({
+                    ...stockForm,
+                    industry: value
+                  })
+                }
+              />
 
+              <Input
+                label="Sector"
+                value={stockForm.sector}
+                onChange={(value) =>
+                  setStockForm({
+                    ...stockForm,
+                    sector: value
+                  })
+                }
+              />
 
-                <div className="col-md-6 mb-3">
-
-                  <label className="form-label">
-                    Name
-                  </label>
-
-                  <input
-                    type="text"
-                    name="name"
-                    className="form-control"
-                    value={stock.name}
-                    onChange={handleStockChange}
-                  />
-
-                </div>
-
-
-                <div className="col-md-6 mb-3">
-
-                  <label className="form-label">
-                    Exchange
-                  </label>
-
-                  <input
-                    type="text"
-                    name="exchange"
-                    className="form-control"
-                    value={stock.exchange}
-                    onChange={handleStockChange}
-                  />
-
-                </div>
-
-
-                <div className="col-md-6 mb-3">
-
-                  <label className="form-label">
-                    ISIN
-                  </label>
-
-                  <input
-                    type="text"
-                    name="isin"
-                    className="form-control"
-                    value={stock.isin}
-                    onChange={handleStockChange}
-                  />
-
-                </div>
-
-
-                <div className="col-md-6 mb-3">
-
-                  <label className="form-label">
-                    GICS
-                  </label>
-
-                  <input
-                    type="text"
-                    name="gics"
-                    className="form-control"
-                    value={stock.gics}
-                    onChange={handleStockChange}
-                  />
-
-                </div>
-
-
-                <div className="col-md-6 mb-3">
-
-                  <label className="form-label">
-                    Country
-                  </label>
-
-                  <input
-                    type="text"
-                    name="country"
-                    className="form-control"
-                    value={stock.country}
-                    onChange={handleStockChange}
-                  />
-
-                </div>
-
-
-                <div className="col-md-6 mb-3">
-
-                  <label className="form-label">
-                    Industry
-                  </label>
-
-                  <input
-                    type="text"
-                    name="industry"
-                    className="form-control"
-                    value={stock.industry}
-                    onChange={handleStockChange}
-                  />
-
-                </div>
-
-
-                <div className="col-md-6 mb-3">
-
-                  <label className="form-label">
-                    Sector
-                  </label>
-
-                  <input
-                    type="text"
-                    name="sector"
-                    className="form-control"
-                    value={stock.sector}
-                    onChange={handleStockChange}
-                  />
-
-                </div>
-
-
-                <div className="col-md-6 mb-3">
-
-                  <label className="form-label">
-                    Asset ID
-                  </label>
-
-                  <input
-                    type="number"
-                    name="assetId"
-                    className="form-control"
-                    value={stock.assetId}
-                    onChange={handleStockChange}
-                    required
-                  />
-
-                </div>
-
-              </div>
-
+              <Input
+                label="Asset ID"
+                type="number"
+                value={stockForm.assetId}
+                onChange={(value) =>
+                  setStockForm({
+                    ...stockForm,
+                    assetId: value
+                  })
+                }
+                required
+              />
 
               <button
+                className="primary-button"
                 type="submit"
-                className="btn btn-success"
               >
                 Add Stock
               </button>
-
             </form>
-
           </div>
 
-        </div>
+          <div className="card">
+            <h2>Delete Stock</h2>
 
+            <Input
+              label="Stock Watchlist ID"
+              type="number"
+              value={stockDeleteId}
+              onChange={setStockDeleteId}
+            />
+
+            <button
+              className="danger-button"
+              onClick={deleteStock}
+            >
+              Delete Stock
+            </button>
+          </div>
+        </div>
       )}
 
-
-      {/* MUTUAL FUND FORM */}
-
-      {type === "mutualFund" && (
-
-        <div className="card">
-
-          <div className="card-header">
-            Add Mutual Fund
-          </div>
-
-          <div className="card-body">
+      {activeTab === "mutualFunds" && (
+        <div className="two-column">
+          <div className="card">
+            <h2>Add Mutual Fund</h2>
 
             <form onSubmit={addMutualFund}>
+              <Input
+                label="ISIN"
+                value={mutualFundForm.isin}
+                onChange={(value) =>
+                  setMutualFundForm({
+                    ...mutualFundForm,
+                    isin: value
+                  })
+                }
+                required
+              />
 
-              <div className="row">
+              <Input
+                label="Scheme Name"
+                value={mutualFundForm.schemeName}
+                onChange={(value) =>
+                  setMutualFundForm({
+                    ...mutualFundForm,
+                    schemeName: value
+                  })
+                }
+                required
+              />
 
-
-                <div className="col-md-6 mb-3">
-
-                  <label className="form-label">
-                    ISIN
-                  </label>
-
-                  <input
-                    type="text"
-                    name="isin"
-                    className="form-control"
-                    value={mutualFund.isin}
-                    onChange={handleMutualFundChange}
-                    required
-                  />
-
-                </div>
-
-
-                <div className="col-md-6 mb-3">
-
-                  <label className="form-label">
-                    Scheme Name
-                  </label>
-
-                  <input
-                    type="text"
-                    name="schemeName"
-                    className="form-control"
-                    value={mutualFund.schemeName}
-                    onChange={handleMutualFundChange}
-                    required
-                  />
-
-                </div>
-
-
-                <div className="col-md-6 mb-3">
-
-                  <label className="form-label">
-                    Asset ID
-                  </label>
-
-                  <input
-                    type="number"
-                    name="assetId"
-                    className="form-control"
-                    value={mutualFund.assetId}
-                    onChange={handleMutualFundChange}
-                    required
-                  />
-
-                </div>
-
-              </div>
-
+              <Input
+                label="Asset ID"
+                type="number"
+                value={mutualFundForm.assetId}
+                onChange={(value) =>
+                  setMutualFundForm({
+                    ...mutualFundForm,
+                    assetId: value
+                  })
+                }
+                required
+              />
 
               <button
+                className="primary-button"
                 type="submit"
-                className="btn btn-success"
               >
                 Add Mutual Fund
               </button>
-
             </form>
-
           </div>
 
-        </div>
+          <div className="card">
+            <h2>Delete Mutual Fund</h2>
 
+            <Input
+              label="Mutual Fund Watchlist ID"
+              type="number"
+              value={mutualFundDeleteId}
+              onChange={setMutualFundDeleteId}
+            />
+
+            <button
+              className="danger-button"
+              onClick={deleteMutualFund}
+            >
+              Delete Mutual Fund
+            </button>
+          </div>
+        </div>
       )}
 
-
-      {/* COMMODITY FORM */}
-
-      {type === "commodity" && (
-
-        <div className="card">
-
-          <div className="card-header">
-            Add Commodity
-          </div>
-
-          <div className="card-body">
+      {activeTab === "commodities" && (
+        <div className="two-column">
+          <div className="card">
+            <h2>Add Commodity</h2>
 
             <form onSubmit={addCommodity}>
+              <Input
+                label="Product ID"
+                value={commodityForm.productId}
+                onChange={(value) =>
+                  setCommodityForm({
+                    ...commodityForm,
+                    productId: value
+                  })
+                }
+              />
 
-              <div className="row">
+              <Input
+                label="Symbol"
+                value={commodityForm.symbol}
+                onChange={(value) =>
+                  setCommodityForm({
+                    ...commodityForm,
+                    symbol: value
+                  })
+                }
+                required
+              />
 
+              <Input
+                label="Name"
+                value={commodityForm.name}
+                onChange={(value) =>
+                  setCommodityForm({
+                    ...commodityForm,
+                    name: value
+                  })
+                }
+              />
 
-                <div className="col-md-6 mb-3">
+              <Input
+                label="Quotation"
+                value={commodityForm.quotation}
+                onChange={(value) =>
+                  setCommodityForm({
+                    ...commodityForm,
+                    quotation: value
+                  })
+                }
+              />
 
-                  <label className="form-label">
-                    Product ID
-                  </label>
+              <Input
+                label="Unit"
+                value={commodityForm.unit}
+                onChange={(value) =>
+                  setCommodityForm({
+                    ...commodityForm,
+                    unit: value
+                  })
+                }
+              />
 
-                  <input
-                    type="text"
-                    name="productId"
-                    className="form-control"
-                    value={commodity.productId}
-                    onChange={handleCommodityChange}
-                  />
+              <Select
+                label="Exchange"
+                value={commodityForm.exchange}
+                onChange={(value) =>
+                  setCommodityForm({
+                    ...commodityForm,
+                    exchange: value
+                  })
+                }
+                options={[
+                  "NSE",
+                  "LSE",
+                  "NasdaQ"
+                ]}
+              />
 
-                </div>
+              <Input
+                label="Asset ID"
+                type="number"
+                value={commodityForm.assetId}
+                onChange={(value) =>
+                  setCommodityForm({
+                    ...commodityForm,
+                    assetId: value
+                  })
+                }
+                required
+              />
 
-
-                <div className="col-md-6 mb-3">
-
-                  <label className="form-label">
-                    Symbol
-                  </label>
-
-                  <input
-                    type="text"
-                    name="symbol"
-                    className="form-control"
-                    value={commodity.symbol}
-                    onChange={handleCommodityChange}
-                    required
-                  />
-
-                </div>
-
-
-                <div className="col-md-6 mb-3">
-
-                  <label className="form-label">
-                    Name
-                  </label>
-
-                  <input
-                    type="text"
-                    name="name"
-                    className="form-control"
-                    value={commodity.name}
-                    onChange={handleCommodityChange}
-                  />
-
-                </div>
-
-
-                <div className="col-md-6 mb-3">
-
-                  <label className="form-label">
-                    Quotation
-                  </label>
-
-                  <input
-                    type="text"
-                    name="quotation"
-                    className="form-control"
-                    value={commodity.quotation}
-                    onChange={handleCommodityChange}
-                  />
-
-                </div>
-
-
-                <div className="col-md-6 mb-3">
-
-                  <label className="form-label">
-                    Unit
-                  </label>
-
-                  <input
-                    type="text"
-                    name="unit"
-                    className="form-control"
-                    value={commodity.unit}
-                    onChange={handleCommodityChange}
-                  />
-
-                </div>
-
-
-                <div className="col-md-6 mb-3">
-
-                  <label className="form-label">
-                    Exchange
-                  </label>
-
-                  <input
-                    type="text"
-                    name="exchange"
-                    className="form-control"
-                    value={commodity.exchange}
-                    onChange={handleCommodityChange}
-                  />
-
-                </div>
-
-
-                <div className="col-md-6 mb-3">
-
-                  <label className="form-label">
-                    Asset ID
-                  </label>
-
-                  <input
-                    type="number"
-                    name="assetId"
-                    className="form-control"
-                    value={commodity.assetId}
-                    onChange={handleCommodityChange}
-                    required
-                  />
-
-                </div>
-
-              </div>
-
+              <Select
+                label="Status"
+                value={String(commodityForm.status)}
+                onChange={(value) =>
+                  setCommodityForm({
+                    ...commodityForm,
+                    status: value === "true"
+                  })
+                }
+                options={[
+                  "true",
+                  "false"
+                ]}
+              />
 
               <button
+                className="primary-button"
                 type="submit"
-                className="btn btn-success"
               >
                 Add Commodity
               </button>
-
             </form>
-
           </div>
 
+          <div className="card">
+            <h2>Delete Commodity</h2>
+
+            <Input
+              label="Commodity Watchlist ID"
+              type="number"
+              value={commodityDeleteId}
+              onChange={setCommodityDeleteId}
+            />
+
+            <button
+              className="danger-button"
+              onClick={deleteCommodity}
+            >
+              Delete Commodity
+            </button>
+          </div>
         </div>
-
       )}
-
-
-      <div className="alert alert-secondary mt-4">
-
-        The current backend provides add and delete
-        operations for watchlists. It does not provide
-        a GET API for displaying all watchlist records.
-
-      </div>
-
     </div>
   );
 }

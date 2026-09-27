@@ -1,61 +1,81 @@
-import { Link } from "react-router-dom";
+import StatCard from "../components/StatCard";
 
-const Dashboard =()=>{
-    return(
-        <>
-            <div className="text-center mb-5">
-                <h1>unified Security Master</h1>
+function Dashboard() {
+  return (
+    <div className="page">
+      <div className="page-header">
+        <div>
+          <h1>Dashboard</h1>
+          <p>
+            Manage assets, securities, bonds and investment watchlists.
+          </p>
+        </div>
+      </div>
 
-                <p className="text-muted">Manage assets, bonds, and security watchlists</p>
-            </div>
+      <div className="stats-grid">
+        <StatCard
+          title="Assets"
+          value="Manage"
+          description="Create, search and deactivate assets"
+        />
 
-            <div className="row">
-                <div className ="col-md-4 mb-4">
-                    <div className ="card dashboard-card">
-                        <div className="card-body">
-                            <h4>Assets</h4>
+        <StatCard
+          title="Bonds"
+          value="Manage"
+          description="Add and remove bond records"
+        />
 
-                            <p>
-                                Add, search and remove assets.
-                            </p>
+        <StatCard
+          title="Watchlists"
+          value="3"
+          description="Stocks, mutual funds and commodities"
+        />
 
-                            <Link to="/assets" className="btn btn-primary">Open Assets</Link>
-                        </div>
-                    </div>
-                </div>
+        <StatCard
+          title="Security Master"
+          value="CRUD"
+          description="Add, update, view and delete securities"
+        />
+      </div>
 
-                <div className ="col-md-4 mb-4">
-                    <div className ="card dashboard-card">
-                        <div className="card-body">
-                            <h4>Bonds</h4>
+      <div className="dashboard-card">
+        <h2>Platform Overview</h2>
 
-                            <p>
-                                Add and remove bonds.
-                            </p>
+        <div className="overview-grid">
+          <div>
+            <h3>Assets</h3>
+            <p>
+              Maintain asset classifications such as asset class,
+              subclass, risk and investment horizon.
+            </p>
+          </div>
 
-                            <Link to="/bonds" className="btn btn-primary">Open Bonds</Link>
-                        </div>
-                    </div>
-                </div>
+          <div>
+            <h3>Securities</h3>
+            <p>
+              Maintain security master records including equities,
+              mutual funds, ETFs, bonds and commodities.
+            </p>
+          </div>
 
-                <div className ="col-md-4 mb-4">
-                    <div className ="card dashboard-card">
-                        <div className="card-body">
-                            <h4>Watchlists</h4>
+          <div>
+            <h3>Watchlists</h3>
+            <p>
+              Manage stock, mutual fund and commodity watchlist records.
+            </p>
+          </div>
 
-                            <p>
-                                Manage stocks, mutual funds and commodities.
-                            </p>
-
-                            <Link to="/watchlists" className="btn btn-primary">Open Watchlists</Link>
-                        </div>
-                    </div>
-                </div>
-
-
-            </div>
-        </>
-    )
+          <div>
+            <h3>Bonds</h3>
+            <p>
+              Add bond master information such as issuer, coupon,
+              maturity and credit rating.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default Dashboard;

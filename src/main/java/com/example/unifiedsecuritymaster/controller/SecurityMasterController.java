@@ -36,7 +36,7 @@ public class SecurityMasterController {
     }
 
     @GetMapping("/get-all-security")
-    public ResponseEntity<?> getAllSecurity(@RequestBody SecurityMaster securityMaster){
+    public ResponseEntity<?> getAllSecurity(){
         return  new ResponseEntity<>(new Response<List<SecurityMaster>>(HttpStatus.OK.value(),true,securityMasterService.getAllSecurity(),"All securities retrieved.", LocalDateTime.now()), HttpStatus.OK);
     }
 

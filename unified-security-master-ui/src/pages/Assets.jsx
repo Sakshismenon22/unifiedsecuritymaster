@@ -1,334 +1,284 @@
 import { useState } from "react";
 import api from "../api";
+import Input from "../components/Input";
+import Select from "../components/Select";
 
-export const Assets =()=>{
+function Assets() {
+  const [form, setForm] = useState({
+    assetClass: "",
+    description: "",
+    assetSubclass: "",
+    risk: "",
+    investmentHorizon: "",
+    subAssetDescription: "",
+    status: true
+  });
 
-    const [asset, setAsset] = useState({
+  const [searchName, setSearchName] = useState("");
+  const [assets, setAssets] = useState([]);
+
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  const updateField = (field, value) => {
+    setForm({
+      ...form,
+      [field]: value
+    });
+  };
+
+  const addAsset = async (e) => {
+    e.preventDefault();
+
+    setMessage("");
+    setError("");
+
+    try {
+      const payload = {
+        ...form,
+        status: Boolean(form.status)
+      };
+
+      await api.post("/assets/add-asset", payload);
+
+      setMessage("Asset added successfully.");
+
+      setForm({
         assetClass: "",
         description: "",
         assetSubclass: "",
-        risk:"",
-        investmentHorizon:"",
-        subAssetDescription:"",
-        status:true
-    });
+        risk: "",
+        investmentHorizon: "",
+        subAssetDescription: "",
+        status: true
+      });
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          "Unable to add asset."
+      );
+    }
+  };
 
-    const [assetName, setAssetName] = useState("");
-
-    const [assets, setAssets] = useState([]);
-
-    const [message, setMessage] = useState("");
-
-    const handleChange = (event)=>{
-        const {name, value} = event.target;
-
-        setAsset({
-            ...asset,
-            [name]:value
-        });
+  const searchAssets = async () => {
+    if (!searchName.trim()) {
+      setError("Enter an asset name to search.");
+      return;
     }
 
-    async function addAsset(event){
-        event.preventDefault();
+    setMessage("");
+    setError("");
 
-        try{
-            const response = await api.post(
-                "/assets/add-asset",
-                assets
-            );
+    try {
+      const response = await api.get(
+        `/assets/get-assets/${encodeURIComponent(searchName)}`
+      );
 
-            console.log(response.data);
+      const data = response.data;
 
-            setMessage("Asset added successfully.");
+      setAssets(
+        data?.data ||
+          data?.result ||
+          data ||
+          []
+      );
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          "Unable to search assets."
+      );
+    }
+  };
 
-            setAsset({
-                assetClass: "",
-                description: "",
-                assetSubclass: "",
-                risk:"",
-                investmentHorizon:"",
-                subAssetDescription:"",
-                status:true
-            });
-
-        }catch(error){
-            console.log(error);
-
-            setMessage("Failed to add asset");
-        }
-        
+  const deleteAsset = async (id) => {
+    if (!window.confirm(`Delete asset ${id}?`)) {
+      return;
     }
 
-    async function searchAssets() {
+    try {
+      await api.delete(`/assets/delete-asset/${id}`);
 
-        if(assetName.trim() === ""){
+      setMessage("Asset deleted successfully.");
 
-            setMessage("Please enter an asset class");
-
-            return;
-        }
-
-        try{
-            const response = await api.get(
-                `/assets/get-assets/${assetName}`
-            );
-
-            console.log(response.data);
-
-            setAssets(response.data.data || []);
-
-            setMessage("Assets retrieved successfully.");
-        
-        }catch(error){
-
-            console.log(error);
-
-            setMessage("Failed to retrieve assets");
-        }
-    
+      setAssets((previous) =>
+        previous.filter((asset) => asset.id !== id)
+      );
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          "Unable to delete asset."
+      );
     }
+  };
 
-    async function deleteAsset(id) {
+  return (
+    <div className="page">
+      <div className="page-header">
+        <div>
+          <h1>Assets</h1>
+          <p>Create and search asset master records.</p>
+        </div>
+      </div>
 
-        try{
+      {message && <div className="success-message">{message}</div>}
+      {error && <div className="error-message">{error}</div>}
 
-            await api.delete(
-                `/assets/delete-asset/${id}`
-            );
+      <div className="two-column">
+        <div className="card">
+          <h2>Add Asset</h2>
 
-            setMessage("Asset removed successfully.");
+          <form onSubmit={addAsset}>
+            <Input
+              label="Asset Class"
+              value={form.assetClass}
+              onChange={(value) =>
+                updateField("assetClass", value)
+              }
+              required
+            />
 
-            setAssets(assets.filter((item) => item.id !== id));
+            <Input
+              label="Description"
+              value={form.description}
+              onChange={(value) =>
+                updateField("description", value)
+              }
+            />
 
-        }catch(error){
+            <Input
+              label="Asset Subclass"
+              value={form.assetSubclass}
+              onChange={(value) =>
+                updateField("assetSubclass", value)
+              }
+            />
 
-            console.log(error);
+            <Select
+              label="Risk"
+              value={form.risk}
+              onChange={(value) =>
+                updateField("risk", value)
+              }
+              options={[
+                "LOW",
+                "MEDIUM",
+                "HIGH"
+              ]}
+              required
+            />
 
-            setMessage("Failed to remove asset");
-        }
+            <Select
+              label="Investment Horizon"
+              value={form.investmentHorizon}
+              onChange={(value) =>
+                updateField("investmentHorizon", value)
+              }
+              options={[
+                "SHORT",
+                "MEDIUM",
+                "LONG",
+                "SHORT_TO_MEDIUM",
+                "ANY"
+              ]}
+              required
+            />
 
-        
-    }
+            <Input
+              label="Sub Asset Description"
+              value={form.subAssetDescription}
+              onChange={(value) =>
+                updateField("subAssetDescription", value)
+              }
+            />
 
+            <Select
+              label="Status"
+              value={String(form.status)}
+              onChange={(value) =>
+                updateField("status", value === "true")
+              }
+              options={["true", "false"]}
+            />
 
-    return (
-        <>
-            <h2 className="mb-4">Asset Management</h2>
+            <button className="primary-button" type="submit">
+              Add Asset
+            </button>
+          </form>
+        </div>
 
-            {message && (
-                <div className="alert alert-info">
-                    {message}
-                </div>
-            )}
+        <div className="card">
+          <h2>Search Assets</h2>
 
-            {/*Add asset*/}
-            <div className="card mb-4">
-                <div className ="card-header">
-                    Add Asset
-                </div>
+          <div className="search-row">
+            <Input
+              label="Asset Name"
+              value={searchName}
+              onChange={setSearchName}
+              placeholder="Enter asset name"
+            />
 
-                <div className="card-body">
+            <button
+              className="primary-button search-button"
+              onClick={searchAssets}
+            >
+              Search
+            </button>
+          </div>
 
-                    <form onSubmit={addAsset}>
+          {assets.length > 0 && (
+            <div className="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Class</th>
+                    <th>Description</th>
+                    <th>Subclass</th>
+                    <th>Risk</th>
+                    <th>Horizon</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
 
-                        <div className="row">
-
-                            <div className="col-md-6 mb-3">
-
-                                <label className="form-label">Asset Class</label>
-
-                                <input
-                                    type = "text"
-                                    name = "assetClass"
-                                    className="form-control"
-                                    value = {asset.assetClass}
-                                    onChange={handleChange}
-                                    required
-                                />
-
-                            </div>
-
-                            <div className="col-md-6 mb-3">
-
-                                <label className="form-label">Asset Subclass</label>
-
-                                <input
-                                    type = "text"
-                                    name = "assetSubclass"
-                                    className="form-control"
-                                    value = {asset.assetSubclass}
-                                    onChange={handleChange}
-                                    
-                                />
-                                 
-                            </div>
-
-                            <div className="col-md-6 mb-3">
-
-                                <label className="form-label">Description</label>
-
-                                <input
-                                    type = "text"
-                                    name = "description"
-                                    className="form-control"
-                                    value = {asset.description}
-                                    onChange={handleChange}
-                                    
-                                />
-                                 
-                            </div>
-
-                            <div className="col-md-6 mb-3">
-
-                                <label className="form-label">Sub Asset Description</label>
-
-                                <input
-                                    type = "text"
-                                    name = "subAssetDescription"
-                                    className="form-control"
-                                    value = {asset.subAssetDescription}
-                                    onChange={handleChange}
-                                    
-                                />
-                                 
-                            </div>
-
-                            <div className="col-md-6 mb-3">
-
-                                <label className="form-label">Risk</label>
-
-                                <select
-                                    name = "risk"
-                                    className="form-control"
-                                    value = {asset.risk}
-                                    onChange={handleChange}
-                                >
-                                    <option value = "">Select Risk</option>
-                                    <option value = "LOW">LOW</option>
-                                    <option value= "MEDIUM">MEDIUM</option>
-                                    <option value = "HIGH">HIGH</option>
-                                </select>
-                                 
-                            </div>
-
-                            <div className="col-md-6 mb-3">
-
-                                <label className="form-label">Investment Horizon</label>
-
-                                <input
-                                    type = "text"
-                                    name = "investmentHorizon"
-                                    className="form-control"
-                                    value = {asset.investmentHorizon}
-                                    onChange={handleChange}
-                                    required
-                                />
-                                 
-                            </div>
-                        </div>
-
-                            <button
-                                type = "submit"
-                                className="btn btn-success"
-                            >Add Asset
-                            </button>
-
-                    </form>
-                </div>
+                <tbody>
+                  {assets.map((asset) => (
+                    <tr key={asset.id}>
+                      <td>{asset.id}</td>
+                      <td>{asset.assetClass}</td>
+                      <td>{asset.description}</td>
+                      <td>{asset.assetSubclass}</td>
+                      <td>{asset.risk}</td>
+                      <td>{asset.investmentHorizon}</td>
+                      <td>
+                        {asset.status ? "Active" : "Inactive"}
+                      </td>
+                      <td>
+                        <button
+                          className="danger-button small-button"
+                          onClick={() =>
+                            deleteAsset(asset.id)
+                          }
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
+          )}
 
-
-            {/**Search Asset */}
-
-            <div className="card mb-4">
-
-                <div className="card-header">
-                    Search Asset
-                </div>
-
-                <div className="card-body">
-                    <div className="row">
-                        <div className="col-md-8">
-                            <input
-                                type = "text"
-                                className = "form-control"
-                                placeholder="Enter asset class"
-                                value = {assetName}
-                                onChange={(event) => setAssetName(event.target.value)}
-                            />
-                        </div>
-
-                        <div className="col-md-4">
-
-                            <button className="btn btn-primary"
-                                onClick={searchAssets}
-                            >
-                                Search
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-            {/**Asset Results */}
-
-            <div className="card">
-                <div className="card-header">
-                    Search Results
-                </div>
-
-                <div className="card-body">
-                    {assets.length === 0 ? (
-                        <p className="text-muted">
-                            No assets found.
-                        </p>
-                    ) : (
-                        <div className = "table-responsive">
-                            <table className="table table-bordered table-hover">
-                                
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Asset Class</th>
-                                        <th>Subclass</th>
-                                        <th>Description</th>
-                                        <th>Risk</th>
-                                        <th>Status</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-
-                                <tbody>
-                                    {assets.map((item) =>(
-
-                                        <tr key = {item.id}>
-
-                                            <td>{item.id}</td>
-                                            <td>{item.assetClass}</td>
-                                            <td>{item.assetSubclass}</td>
-                                            <td>{item.description}</td>
-                                            <td>{item.risk}</td>
-                                            <td>{item.status ? "Active" : "Inactive"}</td>
-
-                                            <td>
-
-                                                <button
-                                                    className="btn btn-danger btn-sm"
-                                                    onClick = {() => deleteAsset(item.id)}
-                                                >
-                                                    Delete
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                    )}
-                </div>
-            </div>
-        </>
-    )
+          {assets.length === 0 && (
+            <p className="empty-message">
+              Search results will appear here.
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
+
+export default Assets;
