@@ -38,4 +38,9 @@ public class AssetServiceImpl implements AssetService{
     public List<Asset> searchAsset(String assetName) {
         return assetRepository.findByAssetClass(assetName);
     }
+
+
+    public List<Asset> getAllAssets(){
+        return assetRepository.findAll();
+    }
 }

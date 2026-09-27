@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/bonds")
@@ -25,5 +26,9 @@ public class BondController {
     @DeleteMapping("/delete-bond/{id}")
     public Response<String> deleteBond(@PathVariable Integer id){
         return new Response<>(HttpStatus.OK.value(), true, null, bondService.deleteBond(id), LocalDateTime.now());
+    }
+    @GetMapping("/all-bonds")
+    public Response<List<Bond>> getAllBonds(){
+        return new Response<List<Bond>>(HttpStatus.OK.value(), true, bondService.getAllBonds(), "All bonds retrieved", LocalDateTime.now());
     }
 }

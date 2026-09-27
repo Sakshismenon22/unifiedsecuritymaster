@@ -10,6 +10,8 @@ import com.example.unifiedsecuritymaster.repository.MutualFundWatchListRepositor
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class MutualFundWatchListServiceImpl implements MutualFundWatchListService{
@@ -41,5 +43,9 @@ public class MutualFundWatchListServiceImpl implements MutualFundWatchListServic
         }else{
             throw new MutualFundWatchListNotFoundException();
         }
+    }
+
+    public List<MutualFundWatchList> getAllMutualFunds(){
+        return mutualFundWatchListRepository.findAll();
     }
 }

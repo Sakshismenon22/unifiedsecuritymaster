@@ -12,4 +12,6 @@ public interface AssetService {
 
     public List<Asset> searchAsset(String assetName);
 
+    public List<Asset> getAllAssets();
+
 }

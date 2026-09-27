@@ -32,4 +32,8 @@ public class AssetController {
     public Response<List<Asset>> searchAsset(@PathVariable String assetName){
         return new Response<>(HttpStatus.OK.value(), true, assetService.searchAsset(assetName), "Retrieved", LocalDateTime.now());
     }
+    @GetMapping("/all-assets")
+    public Response<List<Asset>> getAllAssets(){
+        return new Response<>(HttpStatus.OK.value(), true, assetService.getAllAssets(), "All assets retrieved", LocalDateTime.now());
+    }
 }

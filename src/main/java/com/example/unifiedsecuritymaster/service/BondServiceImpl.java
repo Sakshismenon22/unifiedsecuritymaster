@@ -11,6 +11,8 @@ import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class BondServiceImpl implements BondService {
@@ -41,5 +43,11 @@ public class BondServiceImpl implements BondService {
             bondRepository.deleteById(id);
 
         return "Bond has been deleted";
+    }
+
+
+    @Override
+    public List<Bond> getAllBonds() {
+        return bondRepository.findAll();
     }
 }
