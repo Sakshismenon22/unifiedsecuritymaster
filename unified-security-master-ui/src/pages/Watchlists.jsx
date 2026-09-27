@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../api";
 import Input from "../components/Input";
 import Select from "../components/Select";
 
 function Watchlists() {
   const [activeTab, setActiveTab] = useState("stocks");
+
+  const [stocks, setStocks] = useState([]);
+  const [mutualFunds, setMutualFunds] =  useState([]);
+  const [commodities, setCommodities] = useState([]);
 
   const [stockForm, setStockForm] = useState({
     symbol: "",
@@ -44,6 +48,50 @@ function Watchlists() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
+  useEffect(() =>{
+
+    fetchStocks();
+    fetchMutualFunds();
+    fetchCommodities();
+  }, []);
+
+  const fetchStocks = async () =>{
+    try{
+      const response = await api.get("/stock-watchlist/all-stocks");
+
+      setStocks(response.data?.data || []);
+
+    }catch(error){
+
+      setError(error.response?.data?.message || "Unable to load stocks");
+    }
+  };
+
+
+  const fetchMutualFunds = async () =>{
+    try{
+      const response = await api.get("/mutualfunds-watchlist/all-mutual-funds");
+
+      setMutualFunds(response.data?.data || []);
+
+    }catch(error){
+
+      setError(error.response?.data?.message || "Unable to load mutual funds");
+    }
+  };
+
+  const fetchCommodities = async () =>{
+    try{
+      const response = await api.get("/commodity-watchlist/all-commodities");
+
+      setCommodities(response.data?.data || []);
+
+    }catch(error){
+
+      setError(error.response?.data?.message || "Unable to load commodities");
+    }
+  };
+
   const showSuccess = (text) => {
     setError("");
     setMessage(text);
@@ -81,6 +129,9 @@ function Watchlists() {
         sector: "",
         assetId: ""
       });
+
+      await fetchStocks();
+
     } catch (err) {
       showError(
         err.response?.data?.message ||
@@ -102,6 +153,9 @@ function Watchlists() {
 
       showSuccess("Stock removed from watchlist.");
       setStockDeleteId("");
+
+      await fetchStocks();
+
     } catch (err) {
       showError(
         err.response?.data?.message ||
@@ -131,6 +185,9 @@ function Watchlists() {
         schemeName: "",
         assetId: ""
       });
+
+      await fetchMutualFunds();
+
     } catch (err) {
       showError(
         err.response?.data?.message ||
@@ -152,6 +209,9 @@ function Watchlists() {
 
       showSuccess("Mutual fund removed from watchlist.");
       setMutualFundDeleteId("");
+
+      await fetchMutualFunds();
+
     } catch (err) {
       showError(
         err.response?.data?.message ||
@@ -187,6 +247,9 @@ function Watchlists() {
         assetId: "",
         status: true
       });
+
+      await fetchCommodities();
+
     } catch (err) {
       showError(
         err.response?.data?.message ||
@@ -208,6 +271,9 @@ function Watchlists() {
 
       showSuccess("Commodity removed from watchlist.");
       setCommodityDeleteId("");
+
+      await fetchCommodities();
+
     } catch (err) {
       showError(
         err.response?.data?.message ||
@@ -385,7 +451,63 @@ function Watchlists() {
           </div>
 
           <div className="card">
-            <h2>Delete Stock</h2>
+            <h2>Stocks</h2>
+
+            {stocks.length > 0 ? (
+              <div className="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Symbol</th>
+                      <th>Name</th>
+                      <th>Exchange</th>
+                      <th>ISIN</th>
+                      <th>GICS</th>
+                      <th>Country</th>
+                      <th>Industry</th>
+                      <th>Sector</th>
+                      <th>Asset ID</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {stocks.map( (stock) =>(
+                      <tr key = {stock.id}>
+                        <td>{stock.id}</td>
+                        <td>{stock.symbol}</td>
+                        <td>{stock.name}</td>
+                        <td>{stock.exchange}</td>
+                        <td>{stock.isin}</td>
+                        <td>{stock.gics}</td>
+                        <td>{stock.country}</td>
+                        <td>{stock.industry}</td>
+                        <td>{stock.sector}</td>
+                        <td>{stock.asset?.id ?? "-"}</td>
+                        <td>
+                          <button className="danger-button small-button"
+                                  onClick = {() => deleteStock(stock.id)}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="empty-message">
+                No stocks in the watchlist
+              </p>
+            )}
+          </div>
+          
+          
+
+          <div className="card delete-section">
+            <h2>Delete Stock by ID</h2>
 
             <Input
               label="Stock Watchlist ID"
@@ -457,6 +579,52 @@ function Watchlists() {
           </div>
 
           <div className="card">
+            <h2>Mutual Funds</h2>
+
+            {mutualFunds.length > 0 ? (
+              <div className="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>ISIN</th>
+                      <th>Scheme Name</th>
+                      <th>Asset ID</th>
+                      <th>Status</th>
+                      <th>Last Updated</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {mutualFunds.map( (mf) =>(
+                      <tr key = {mf.id}>
+                        <td>{mf.id}</td>
+                        <td>{mf.isin}</td>
+                        <td>{mf.schemeName}</td>
+                        <td>{mf.asset?.id ?? "-"}</td>
+                        <td>{mf.status === true ? "Active" : mf.status === false ? "Inactive" : "-"}</td>
+                        <td>{mf.lastUpdatedAt ? new Date(mf.lastUpdateAt).toLocaleString() : "-"}</td>
+                        <td>
+                          <button className="danger-button small-button"
+                            onClick = {() => deleteMutualFund(mf.id)}>
+                              Delete
+                          </button>
+                        </td>
+                        
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="empty-message">
+                No mutual funds in the watchlist
+              </p>
+            )}
+          </div>
+
+          <div className="card delete-section">
             <h2>Delete Mutual Fund</h2>
 
             <Input
@@ -592,7 +760,61 @@ function Watchlists() {
           </div>
 
           <div className="card">
-            <h2>Delete Commodity</h2>
+            <h2>Commodities</h2>
+
+            {commodities.length > 0 ? (
+              <div className="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Product ID</th>
+                      <th>Symbol</th>
+                      <th>Name</th>
+                      <th>Quotation</th>
+                      <th>Unit</th>
+                      <th>Exchange</th>
+                      <th>Asset ID</th>
+                      <th>Status</th>
+                      <th>Last Updated</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {commodities.map( (commodity) =>(
+                      <tr key = {commodity.id}>
+                        <td>{commodity.id}</td>
+                        <td>{commodity.productId}</td>
+                        <td>{commodity.symbol}</td>
+                        <td>{commodity.name}</td>
+                        <td>{commodity.quotation}</td>
+                        <td>{commodity.unit}</td>
+                        <td>{commodity.exchange}</td>
+                        <td>{commodity.asset?.id ?? "-"}</td>
+                        <td>{commodity.status === true ? "Active" : commodity.status === false ? "Inactive" : "-"}</td>
+                        <td>{commodity.lastUpdateAt ? new Date(commodity.lastUpdateAt).toLocaleString() : "-"}</td>
+                        <td>
+                          <button className="danger-button small-button"
+                                  onClick = {() => deleteCommodity(commodity.id)}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="empty-message">
+                No commodities in the watchlist
+              </p>
+            )}
+          </div>
+
+          <div className="card delete-section">
+            <h2>Delete Commodity by ID</h2>
 
             <Input
               label="Commodity Watchlist ID"
