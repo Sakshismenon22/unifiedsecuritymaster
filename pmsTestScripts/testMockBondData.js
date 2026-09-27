@@ -790,6 +790,7 @@ const bonds = [
   ...nasdaQBonds
 ];
 
-for (const bond of bonds) {
+for (let bond of bonds) {
+    bond = {...bond,country:"IN"}
     await createBond(bond);
 }

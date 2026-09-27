@@ -1,11 +1,11 @@
 package com.example.unifiedsecuritymaster.config;
 
+import com.example.unifiedsecuritymaster.batch.CommoditySkipListener;
 import com.example.unifiedsecuritymaster.batch.ListUnpackingItemWriter;
-import com.example.unifiedsecuritymaster.batch.MutualFundSkipListener;
-import com.example.unifiedsecuritymaster.exception.MutualFundApiException;
-import com.example.unifiedsecuritymaster.model.MutualFundNav;
-import com.example.unifiedsecuritymaster.model.MutualFundWatchList;
-import com.example.unifiedsecuritymaster.repository.MutualFundWatchListRepository;
+import com.example.unifiedsecuritymaster.exception.CommodityApiException;
+import com.example.unifiedsecuritymaster.model.CommoditySpotData;
+import com.example.unifiedsecuritymaster.model.CommodityWatchList;
+import com.example.unifiedsecuritymaster.repository.CommodityWatchListRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.job.Job;
@@ -33,20 +33,19 @@ import java.util.Map;
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-public class MutualFundBatchConfig {
+public class CommodityBatchConfig {
 
-    public static final String JOB_NAME  = "mutualFundNavLoadJob";
-    public static final String STEP_NAME = "loadMutualFundNavStep";
+    public static final String JOB_NAME  = "commoditySpotLoadJob";
+    public static final String STEP_NAME = "loadCommoditySpotStep";
 
     private final BatchProperties batchProps;
 
 
     @Bean
-    public RepositoryItemReader<MutualFundWatchList> mfWatchListReader(
-            MutualFundWatchListRepository repo) {
-
-        return new RepositoryItemReaderBuilder<MutualFundWatchList>()
-                .name("mfWatchListReader")
+    public RepositoryItemReader<CommodityWatchList> commodityWatchListReader(
+            CommodityWatchListRepository repo) {
+        return new RepositoryItemReaderBuilder<CommodityWatchList>()
+                .name("commodityWatchListReader")
                 .repository(repo)
                 .methodName("findAll")
                 .pageSize(batchProps.getPageSize())
@@ -57,19 +56,23 @@ public class MutualFundBatchConfig {
 
 
     @Bean
-    public JdbcBatchItemWriter<MutualFundNav> mfNavJdbcWriter(DataSource dataSource) {
-        return new JdbcBatchItemWriterBuilder<MutualFundNav>()
-                .dataSource(dataSource)
+    public JdbcBatchItemWriter<CommoditySpotData> commoditySpotJdbcWriter(DataSource ds) {
+        return new JdbcBatchItemWriterBuilder<CommoditySpotData>()
+                .dataSource(ds)
                 .sql("""
-                     INSERT INTO mutualfund_nav
-                         (isin, scheme_code, scheme_name, nav_date, nav, watchlist_id)
+                     INSERT INTO commodity_spot_data
+                         (symbol, spot_date, spot_price1, spot_price2, spot_price,
+                          quotation, price_timestamp, is_final, watchlist_id)
                      VALUES
-                         (:isin, :schemeCode, :schemeName, :navDate, :nav, :watchlistId)
-                     ON CONFLICT (isin, nav_date)
-                     DO UPDATE SET nav          = EXCLUDED.nav,
-                                   scheme_code  = EXCLUDED.scheme_code,
-                                   scheme_name  = EXCLUDED.scheme_name,
-                                   watchlist_id = EXCLUDED.watchlist_id
+                         (:symbol, :spotDate, :spotPrice1, :spotPrice2, :spotPrice,
+                          :quotation, :priceTimestamp, :isFinal, :watchlistId)
+                     ON CONFLICT (symbol, spot_date)
+                     DO UPDATE SET spot_price1     = EXCLUDED.spot_price1,
+                                   spot_price2     = EXCLUDED.spot_price2,
+                                   spot_price      = EXCLUDED.spot_price,
+                                   price_timestamp = EXCLUDED.price_timestamp,
+                                   is_final        = EXCLUDED.is_final,
+                                   watchlist_id    = EXCLUDED.watchlist_id
                      """)
                 .beanMapped()
                 .assertUpdates(false)
@@ -77,18 +80,19 @@ public class MutualFundBatchConfig {
     }
 
     @Bean
-    public ItemWriter<List<MutualFundNav>> mfNavWriter(
-            JdbcBatchItemWriter<MutualFundNav> delegate) {
+    public ItemWriter<List<CommoditySpotData>> commoditySpotWriter(
+            JdbcBatchItemWriter<CommoditySpotData> delegate) {
         return new ListUnpackingItemWriter<>(delegate);
     }
 
+
     @Bean
-    public Step loadMutualFundNavStep(
+    public Step loadCommoditySpotStep(
             JobRepository jobRepository,
             PlatformTransactionManager transactionManager,
-            RepositoryItemReader<MutualFundWatchList> mfWatchListReader,
-            ItemProcessor<MutualFundWatchList, List<MutualFundNav>> mutualFundNavProcessor,
-            ItemWriter<List<MutualFundNav>> mfNavWriter) {
+            RepositoryItemReader<CommodityWatchList> commodityWatchListReader,
+            ItemProcessor<CommodityWatchList, List<CommoditySpotData>> commoditySpotProcessor,
+            ItemWriter<List<CommoditySpotData>> commoditySpotWriter) {
 
         ExponentialBackOffPolicy backOff = new ExponentialBackOffPolicy();
         backOff.setInitialInterval(1000);
@@ -96,27 +100,27 @@ public class MutualFundBatchConfig {
         backOff.setMaxInterval(15000);
 
         return new StepBuilder(STEP_NAME, jobRepository)
-                .<MutualFundWatchList, List<MutualFundNav>>chunk(
+                .<CommodityWatchList, List<CommoditySpotData>>chunk(
                         batchProps.getChunkSize(), transactionManager)
-                .reader(mfWatchListReader)
-                .processor(mutualFundNavProcessor)
-                .writer(mfNavWriter)
+                .reader(commodityWatchListReader)
+                .processor(commoditySpotProcessor)
+                .writer(commoditySpotWriter)
                 .faultTolerant()
-                .retry(MutualFundApiException.class)
+                .retry(CommodityApiException.class)
                 .retry(ResourceAccessException.class)
                 .retryLimit(batchProps.getRetryLimit())
                 .backOffPolicy(backOff)
-                .skip(MutualFundApiException.class)
+                .skip(CommodityApiException.class)
                 .skipLimit(batchProps.getSkipLimit())
-                .listener(new MutualFundSkipListener())
+                .listener(new CommoditySkipListener())
                 .build();
     }
 
+
     @Bean
-    public Job mutualFundNavLoadJob(JobRepository jobRepository,
-                                    Step loadMutualFundNavStep) {
+    public Job commoditySpotLoadJob(JobRepository jobRepository, Step loadCommoditySpotStep) {
         return new JobBuilder(JOB_NAME, jobRepository)
-                .start(loadMutualFundNavStep)
+                .start(loadCommoditySpotStep)
                 .build();
     }
 }
