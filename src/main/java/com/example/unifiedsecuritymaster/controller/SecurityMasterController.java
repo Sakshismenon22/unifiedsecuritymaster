@@ -2,6 +2,7 @@ package com.example.unifiedsecuritymaster.controller;
 
 import com.example.unifiedsecuritymaster.dto.request.AddSecurityMasterDTO;
 import com.example.unifiedsecuritymaster.dto.request.AddStockDTO;
+import com.example.unifiedsecuritymaster.dto.response.SecurityPriceDTO;
 import com.example.unifiedsecuritymaster.model.SecurityMaster;
 import com.example.unifiedsecuritymaster.response.Response;
 import com.example.unifiedsecuritymaster.service.SecurityMasterService;
@@ -38,6 +39,11 @@ public class SecurityMasterController {
     @GetMapping("/get-all-security")
     public ResponseEntity<?> getAllSecurity(){
         return  new ResponseEntity<>(new Response<List<SecurityMaster>>(HttpStatus.OK.value(),true,securityMasterService.getAllSecurity(),"All securities retrieved.", LocalDateTime.now()), HttpStatus.OK);
+    }
+
+    @GetMapping("/get-security-price/{securityId}")
+    public ResponseEntity<?> getSecurityPrice(@PathVariable Long securityId){
+        return  new ResponseEntity<>(new Response<SecurityPriceDTO>(HttpStatus.OK.value(),true,securityMasterService.getSecurityLatestPrice(securityId),"Security Price retrieved.", LocalDateTime.now()), HttpStatus.OK);
     }
 
 

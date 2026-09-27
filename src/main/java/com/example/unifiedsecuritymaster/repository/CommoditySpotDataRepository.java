@@ -1,6 +1,7 @@
 package com.example.unifiedsecuritymaster.repository;
 
 import com.example.unifiedsecuritymaster.model.CommoditySpotData;
+import com.example.unifiedsecuritymaster.model.MutualFundNav;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,4 +20,7 @@ public interface CommoditySpotDataRepository extends JpaRepository<CommoditySpot
     @Query("SELECT c.symbol, COUNT(c), MIN(c.spotDate), MAX(c.spotDate) " +
             "FROM CommoditySpotData c GROUP BY c.symbol ORDER BY c.symbol")
     List<Object[]> summariseBySymbol();
+
+    @Query("select c from CommoditySpotData c where c.symbol = :symbol order by c.priceTimestamp desc limit 1")
+    CommoditySpotData findLatestPrice(@Param("symbol") String symbol);
 }

@@ -1,6 +1,7 @@
 package com.example.unifiedsecuritymaster.repository;
 
 import com.example.unifiedsecuritymaster.model.MutualFundNav;
+import com.example.unifiedsecuritymaster.model.StockData;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,4 +19,7 @@ public interface MutualFundNavRepository extends JpaRepository<MutualFundNav, Lo
     @Query("SELECT n.isin, COUNT(n), MIN(n.navDate), MAX(n.navDate) " +
             "FROM MutualFundNav n GROUP BY n.isin ORDER BY n.isin")
     List<Object[]> summariseByIsin();
+
+    @Query("select m from MutualFundNav m where m.isin = :isin order by m.navDate desc limit 1")
+    MutualFundNav findLatestPrice(@Param("isin") String isin);
 }

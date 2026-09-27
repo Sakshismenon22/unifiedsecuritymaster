@@ -20,4 +20,7 @@ public interface StockDataRepository extends JpaRepository<StockData, Long> {
     @Query("SELECT s.symbol, COUNT(s), MIN(s.tradeDate), MAX(s.tradeDate) " +
             "FROM StockData s GROUP BY s.symbol ORDER BY s.symbol")
     List<Object[]> summariseBySymbol();
+
+    @Query("select s from StockData s where s.symbol = :symbol order by s.tradeDate desc limit 1")
+    StockData findLatestPrice(@Param("symbol") String symbol);
 }
