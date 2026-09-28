@@ -1,6 +1,8 @@
 package com.example.unifiedsecuritymaster.service;
 
 import com.example.unifiedsecuritymaster.dto.request.AddSecurityMasterDTO;
+import com.example.unifiedsecuritymaster.dto.response.SecuritiesInfoDTO;
+import com.example.unifiedsecuritymaster.dto.response.SecurityInfoDTO;
 import com.example.unifiedsecuritymaster.dto.response.SecurityPriceDTO;
 import com.example.unifiedsecuritymaster.exception.AssetNotFoundException;
 import com.example.unifiedsecuritymaster.exception.SecurityNotFoundException;
@@ -10,6 +12,7 @@ import com.example.unifiedsecuritymaster.repository.*;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -111,5 +114,38 @@ public class SecurityMasterImpl implements SecurityMasterService {
         }else{
             throw new SecurityNotFoundException();
         }
+    }
+
+    @Override
+    public SecuritiesInfoDTO getAllSecurityInfo() {
+        SecuritiesInfoDTO securitiesInfoDTO = new SecuritiesInfoDTO(new ArrayList<SecurityInfoDTO>());
+        List<SecurityMaster> securityMasters = getAllSecurity();
+        for(SecurityMaster securityMaster:securityMasters){
+            SecurityPriceDTO securityPriceDTO = getSecurityLatestPrice(securityMaster.getId());
+            SecurityInfoDTO securityInfoDTO = new SecurityInfoDTO();
+            securityInfoDTO.setAsset(securityMaster.getAsset());
+            securityInfoDTO.setId(securityMaster.getId());
+            securityInfoDTO.setSymbol(securityMaster.getSymbol());
+            securityInfoDTO.setIsin(securityMaster.getIsin());
+            securityInfoDTO.setName(securityMaster.getName());
+            SecurityType type = securityMaster.getSecurityType();
+            switch(type){
+                case EQUITY,ETF ->{
+                    securityInfoDTO.setPrice(securityPriceDTO.getStockData().getClosePrice().doubleValue());
+                }
+                case MUTUAL_FUND -> {
+                    securityInfoDTO.setPrice(securityPriceDTO.getMutualFundNav().getNav().doubleValue());
+                }
+                case COMMODITY -> {
+                    securityInfoDTO.setPrice(securityPriceDTO.getCommoditySpotData().getSpotPrice().doubleValue());
+                }
+                case BOND -> {
+                    securityInfoDTO.setPrice(securityPriceDTO.getBond().getCleanPrice());
+                }
+            }
+            securitiesInfoDTO.getSecurities().add(securityInfoDTO);
+
+        }
+        return securitiesInfoDTO;
     }
 }
