@@ -2,6 +2,8 @@ package com.example.unifiedsecuritymaster.service;
 
 
 import com.example.unifiedsecuritymaster.dto.request.AddSecurityMasterDTO;
+import com.example.unifiedsecuritymaster.dto.response.SecuritiesInfoDTO;
+import com.example.unifiedsecuritymaster.dto.response.SecurityPriceDTO;
 import com.example.unifiedsecuritymaster.model.SecurityMaster;
 
 import java.util.List;
@@ -16,4 +18,7 @@ public interface SecurityMasterService {
 
     public List<SecurityMaster> getAllSecurity();
 
+    public SecurityPriceDTO getSecurityLatestPrice(Long securityId);
+
+    public SecuritiesInfoDTO getAllSecurityInfo();
 }
