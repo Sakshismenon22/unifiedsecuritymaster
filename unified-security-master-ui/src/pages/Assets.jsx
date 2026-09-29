@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../api";
 import Input from "../components/Input";
 import Select from "../components/Select";
@@ -19,6 +19,21 @@ function Assets() {
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(()=>{
+    fetchAssets();
+  }, []);
+
+  const fetchAssets = async() =>{
+    try{
+        const response = await api.get("/assets/all-assets");
+
+        setAssets(response.data?.data || []);
+
+    }catch(error){
+        setError(error.response?.data?.message || "Unable to load assets");
+    }
+  };
 
   const updateField = (field, value) => {
     setForm({
@@ -52,6 +67,9 @@ function Assets() {
         subAssetDescription: "",
         status: true
       });
+
+      await fetchAssets();
+
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -103,6 +121,9 @@ function Assets() {
       setAssets((previous) =>
         previous.filter((asset) => asset.id !== id)
       );
+
+      await fetchAssets();
+      
     } catch (err) {
       setError(
         err.response?.data?.message ||

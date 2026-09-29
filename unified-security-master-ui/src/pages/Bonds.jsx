@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../api";
 import Input from "../components/Input";
 import Select from "../components/Select";
@@ -22,9 +22,25 @@ function Bonds() {
   });
 
   const [deleteId, setDeleteId] = useState("");
+  const [bonds, setBonds] = useState([]);
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() =>{
+    fetchBonds();
+  }, []);
+
+  const fetchBonds = async () =>{
+    try{
+        const response = await api.get("/bonds/all-bonds");
+
+        setBonds(response.data?.data || []);
+
+    }catch(error){
+        setError(error.response?.data?.data || "Unable to load bonds");
+    }
+  }; 
 
   const updateField = (field, value) => {
     setForm({
@@ -73,6 +89,9 @@ function Bonds() {
         assetId: "",
         country: ""
       });
+
+      await fetchBonds();
+
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -95,6 +114,8 @@ function Bonds() {
 
       setMessage("Bond deleted successfully.");
       setDeleteId("");
+
+      await fetchBonds();
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -248,7 +269,72 @@ function Bonds() {
         </div>
 
         <div className="card">
-          <h2>Delete Bond</h2>
+            <h2>Bonds</h2>
+
+            <div className="table-wrapper">
+                {bonds.length > 0 ? (
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>ISIN</th>
+                                <th>Name</th>
+                                <th>Issuer</th>
+                                <th>Bond Type</th>
+                                <th>Exchange</th>
+                                <th>Currency</th>
+                                <th>Face Value</th>
+                                <th>Coupon Rate</th>
+                                <th>Coupon Frequency</th>
+                                <th>Issue Date</th>
+                                <th>Maturity Date</th>
+                                <th>Credit Rating</th>
+                                <th>Asset ID</th>
+                                <th>Country</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {bonds.map((bond) => (
+                                <tr key = {bond.id}>
+                                    <td>{bond.id}</td>
+                                    <td>{bond.isin}</td>
+                                    <td>{bond.name}</td>
+                                    <td>{bond.issuerName}</td>
+                                    <td>{bond.bondType}</td>
+                                    <td>{bond.exchange}</td>
+                                    <td>{bond.currency}</td>
+                                    <td>{bond.faceValue}</td>
+                                    <td>{bond.couponRate}</td>
+                                    <td>{bond.couponFrequency}</td>
+                                    <td>{bond.issueDate}</td>
+                                    <td>{bond.maturityDate}</td>
+                                    <td>{bond.creditRating}</td>
+                                    <td>{bond.asset?.id ?? "-"}</td>
+                                    <td>{bond.country}</td>
+                                    <td>{bond.status === true ? "Active" : bond.status === false ? "Inactive" : "-"}</td>
+                                    <td>
+                                        <button className="danger-button small-button"
+                                            onClick = {() => { setDeleteId(bond.id)}}>
+                                                Delete
+                                            </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                ) : (
+                    <p className="empty-message">
+                        No bonds found.
+                    </p>
+                )}
+            </div>
+        </div>
+
+        <div className="delete-section">
+          <h2>Delete Bond by ID</h2>
 
           <Input
             label="Bond ID"
@@ -264,15 +350,6 @@ function Bonds() {
           >
             Delete Bond
           </button>
-
-          <div className="info-box">
-            <strong>Note:</strong>
-            <p>
-              The current backend does not expose a GET-all-bonds
-              or update-bond endpoint, so this page only provides
-              the operations actually available in the backend.
-            </p>
-          </div>
         </div>
       </div>
     </div>

@@ -11,6 +11,8 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @AllArgsConstructor
 public class CommodityWatchListService {
@@ -39,6 +41,10 @@ public class CommodityWatchListService {
         }else {
             throw new AssetNotFoundException();
         }
+    }
+
+    public List<CommodityWatchList> getAllCommodities(){
+        return commodityWatchListRepository.findAll();
     }
 
 

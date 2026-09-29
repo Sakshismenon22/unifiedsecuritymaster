@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,6 +27,11 @@ public class CommodityWatchListController {
     @DeleteMapping("/delete-commodity/{id}")
     public Response<String> removeCommodity(@PathVariable Integer id){
         return new Response<>(HttpStatus.OK.value(), true, null,commodityWatchListService.deleteCommodity(id), LocalDateTime.now());
+    }
+
+    @GetMapping("/all-commodities")
+    public Response<List<CommodityWatchList>> getAllCommodities(){
+        return new Response<>(HttpStatus.OK.value(), true, commodityWatchListService.getAllCommodities(), "All commodities retrieved", LocalDateTime.now());
     }
 
 }

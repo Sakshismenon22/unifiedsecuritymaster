@@ -10,6 +10,8 @@ import com.example.unifiedsecuritymaster.repository.StockWatchListRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @AllArgsConstructor
 public class StockWatchListServiceImpl implements StockWatchListService {
@@ -41,5 +43,9 @@ public class StockWatchListServiceImpl implements StockWatchListService {
         }else{
             throw new StockNotFound();
         }
+    }
+
+    public List<StockWatchList> getAllStocks(){
+        return stockWatchListRepository.findAll();
     }
 }
