@@ -22,4 +22,16 @@ const searchAsset = async (assetName)=>{
     }
 }
 
-await searchAsset("Equity");
+// await searchAsset("Equity");
+
+const getAllAssets = async() =>{
+    try{
+        const response = await axios.get(`http://localhost:8081/api/assets/all-assets`);
+        console.log(response);
+        return response.data.data;
+    }catch(e){
+        return e.response;
+    }
+}
+
+await getAllAssets();
