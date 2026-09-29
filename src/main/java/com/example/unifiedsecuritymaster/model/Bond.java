@@ -29,6 +29,7 @@ public class Bond {
 
     private String bondType;
 
+    @Enumerated(EnumType.STRING)
     private Exchange exchange;
 
     private String currency;
