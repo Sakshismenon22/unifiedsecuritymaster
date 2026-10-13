@@ -8,6 +8,7 @@ import com.example.unifiedsecuritymaster.model.SecurityMaster;
 import com.example.unifiedsecuritymaster.response.Response;
 import com.example.unifiedsecuritymaster.service.SecurityMasterService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -42,6 +43,27 @@ public class SecurityMasterController {
         return  new ResponseEntity<>(new Response<List<SecurityMaster>>(HttpStatus.OK.value(),true,securityMasterService.getAllSecurity(),"All securities retrieved.", LocalDateTime.now()), HttpStatus.OK);
     }
 
+    @GetMapping("/get-all-security-page")
+    public ResponseEntity<?> getAllSecurityPage(@RequestParam(defaultValue = "0") int page,
+                                              @RequestParam(defaultValue = "10") int size) {
+        return new ResponseEntity<>(
+                new Response<Page<SecurityMaster>>(HttpStatus.OK.value(), true,
+                        securityMasterService.getAllSecurityPage(page, size),
+                        "All securities retrieved by page.", LocalDateTime.now()),
+                HttpStatus.OK);
+    }
+
+    @GetMapping("/search-by-name")
+    public ResponseEntity<?> searchSecurityByName(@RequestParam String name,
+                                                @RequestParam(defaultValue = "0") int page,
+                                                @RequestParam(defaultValue = "10") int size) {
+        return new ResponseEntity<>(
+                new Response<Page<SecurityMaster>>(HttpStatus.OK.value(), true,
+                        securityMasterService.searchSecurityByName(name, page, size),
+                        "Securities matching the name retrieved.", LocalDateTime.now()),
+                HttpStatus.OK);
+    }
+
     @GetMapping("/get-security-price/{securityId}")
     public ResponseEntity<?> getSecurityPrice(@PathVariable Long securityId){
         return  new ResponseEntity<>(new Response<SecurityPriceDTO>(HttpStatus.OK.value(),true,securityMasterService.getSecurityLatestPrice(securityId),"Security Price retrieved.", LocalDateTime.now()), HttpStatus.OK);
@@ -52,6 +74,11 @@ public class SecurityMasterController {
         return new ResponseEntity<>(new Response<SecuritiesInfoDTO>(HttpStatus.OK.value(), true, securityMasterService.getAllSecurityInfo(), "All securities info retrieved.",LocalDateTime.now()),HttpStatus.OK);
     }
 
-
+    @GetMapping("/get-all-security-info-with-current-price")
+    public ResponseEntity<?> getAllSecurityInfoWithCurrentPrice(){
+        return new ResponseEntity<>(new Response<SecuritiesInfoDTO>(HttpStatus.OK.value(), true,
+                securityMasterService.getAllSecurityInfoWithLatestPrice(),
+                "All securities info with current price retrieved.", LocalDateTime.now()), HttpStatus.OK);
+    }
 
 }

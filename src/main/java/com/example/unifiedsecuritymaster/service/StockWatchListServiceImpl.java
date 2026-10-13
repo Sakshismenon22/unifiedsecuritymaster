@@ -8,10 +8,12 @@ import com.example.unifiedsecuritymaster.model.StockWatchList;
 import com.example.unifiedsecuritymaster.repository.AssetRepository;
 import com.example.unifiedsecuritymaster.repository.StockWatchListRepository;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class StockWatchListServiceImpl implements StockWatchListService {
@@ -31,6 +33,7 @@ public class StockWatchListServiceImpl implements StockWatchListService {
                 throw new AssetNotFoundException();
             }
         }else{
+            log.warn(addStockDTO.getSymbol()+"Already exists");
             throw new StockNotFound();
         }
     }

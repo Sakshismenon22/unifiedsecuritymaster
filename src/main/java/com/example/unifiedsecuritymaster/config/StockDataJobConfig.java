@@ -52,7 +52,7 @@ public class StockDataJobConfig {
                 .build();
     }
 
-    // ==================== WRITER ====================
+
     @Bean
     public JdbcBatchItemWriter<StockData> stockDataJdbcWriter(DataSource dataSource) {
         return new JdbcBatchItemWriterBuilder<StockData>()

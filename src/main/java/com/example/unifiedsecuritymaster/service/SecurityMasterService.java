@@ -5,6 +5,7 @@ import com.example.unifiedsecuritymaster.dto.request.AddSecurityMasterDTO;
 import com.example.unifiedsecuritymaster.dto.response.SecuritiesInfoDTO;
 import com.example.unifiedsecuritymaster.dto.response.SecurityPriceDTO;
 import com.example.unifiedsecuritymaster.model.SecurityMaster;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -18,7 +19,13 @@ public interface SecurityMasterService {
 
     public List<SecurityMaster> getAllSecurity();
 
+    public Page<SecurityMaster> getAllSecurityPage(int page, int size);
+
+    public Page<SecurityMaster> searchSecurityByName(String name, int page, int size);
+
     public SecurityPriceDTO getSecurityLatestPrice(Long securityId);
 
     public SecuritiesInfoDTO getAllSecurityInfo();
+
+    public SecuritiesInfoDTO getAllSecurityInfoWithLatestPrice();
 }
