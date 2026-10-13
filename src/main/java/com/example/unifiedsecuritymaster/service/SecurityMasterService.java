@@ -28,4 +28,8 @@ public interface SecurityMasterService {
     public SecuritiesInfoDTO getAllSecurityInfo();
 
     public SecuritiesInfoDTO getAllSecurityInfoWithLatestPrice();
+
+    default SecuritiesInfoDTO searchSecurityInfo(String query) {
+        return getAllSecurityInfoWithLatestPrice();
+    }
 }

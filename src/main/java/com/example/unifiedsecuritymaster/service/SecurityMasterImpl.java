@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Slf4j
 @Service
@@ -237,5 +238,27 @@ public class SecurityMasterImpl implements SecurityMasterService {
         }
 
         return new SecuritiesInfoDTO(securityInfoList);
+    }
+
+    @Override
+    public SecuritiesInfoDTO searchSecurityInfo(String query) {
+        String normalizedQuery = query == null ? "" : query.trim().toLowerCase(Locale.ROOT);
+        SecuritiesInfoDTO allSecurities = getAllSecurityInfoWithLatestPrice();
+        if (normalizedQuery.isEmpty() || allSecurities.getSecurities() == null) {
+            return allSecurities;
+        }
+
+        List<SecurityInfoDTO> matches = allSecurities.getSecurities().stream()
+                .filter(security -> containsIgnoreCase(security.getName(), normalizedQuery)
+                        || containsIgnoreCase(security.getSymbol(), normalizedQuery)
+                        || containsIgnoreCase(security.getIsin(), normalizedQuery)
+                        || containsIgnoreCase(security.getGicsSector(), normalizedQuery)
+                        || containsIgnoreCase(security.getEquityCategory(), normalizedQuery))
+                .toList();
+        return new SecuritiesInfoDTO(matches);
+    }
+
+    private boolean containsIgnoreCase(String value, String normalizedQuery) {
+        return value != null && value.toLowerCase(Locale.ROOT).contains(normalizedQuery);
     }
 }

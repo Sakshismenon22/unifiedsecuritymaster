@@ -74,6 +74,13 @@ public class SecurityMasterController {
         return new ResponseEntity<>(new Response<SecuritiesInfoDTO>(HttpStatus.OK.value(), true, securityMasterService.getAllSecurityInfo(), "All securities info retrieved.",LocalDateTime.now()),HttpStatus.OK);
     }
 
+    @GetMapping("/search-security-info")
+    public ResponseEntity<?> searchSecurityInfo(@RequestParam String query) {
+        return new ResponseEntity<>(new Response<SecuritiesInfoDTO>(HttpStatus.OK.value(), true,
+                securityMasterService.searchSecurityInfo(query),
+                "Securities matching the search query retrieved.", LocalDateTime.now()), HttpStatus.OK);
+    }
+
     @GetMapping("/get-all-security-info-with-current-price")
     public ResponseEntity<?> getAllSecurityInfoWithCurrentPrice(){
         return new ResponseEntity<>(new Response<SecuritiesInfoDTO>(HttpStatus.OK.value(), true,
